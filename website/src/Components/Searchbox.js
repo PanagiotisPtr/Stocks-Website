@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
-import { AutoComplete, Input, Button, Icon } from 'antd';
+import { AutoComplete, Input } from 'antd';
+
+import './Searchbox.css';
 
 class Searchbox extends Component{
 
@@ -29,16 +31,13 @@ class Searchbox extends Component{
 
     render(){
         const {options} = this.state;
-        var searchBox = "";
         return (
             <AutoComplete
-                style={{width: '14vh', margin: '5%', alignItems: 'center'}}
-                className="global-search"
+                className="searchbox"
                 dataSource={options}
                 onSelect={this.onSelect}
                 onSearch={this.handleSearch}
                 placeholder="Search ticker"
-                onChange={e => searchBox = e}
             >
                 <Input
                 spellCheck="false"

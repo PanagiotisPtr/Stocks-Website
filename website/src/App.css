@@ -12,29 +12,11 @@
     align-items: center;
 }
 
-.App-logo {
-  animation: App-logo-spin infinite 20s linear;
-  height: 80px;
-}
-
-.App-header {
-  background-color: #222;
-  height: 150px;
-  padding: 20px;
-  color: white;
-}
-
-.App-title {
-  font-size: 1.5em;
-}
-
-.App-intro {
-  font-size: large;
-}
-
-@keyframes App-logo-spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+.mainContent {
+    background: white;
+    padding: 24;
+    margin: 0;
+    minHeight: 280;
 }
 
 .logo {
@@ -42,42 +24,10 @@
 }
 
 .scrollable{
-    height: 86vh;
+    height: 88vh;
     overflow-y: scroll;
 }
 
 ::-webkit-scrollbar {
     display: none;
-}
-
-.brandName{
-    color: white;
-    margin: 16px auto 16px auto;
-}
-
-
-.global-search {
-  width: 100%;
-}
-
-.global-search.ant-select-auto-complete .ant-select-selection--single {
-  margin-right: -46px;
-}
-
-.global-search.ant-select-auto-complete .ant-input-affix-wrapper .ant-input:not(:last-child) {
-  padding-right: 62px;
-}
-
-.global-search.ant-select-auto-complete .ant-input-affix-wrapper .ant-input-suffix {
-  right: 0;
-}
-
-.global-search.ant-select-auto-complete .ant-input-affix-wrapper .ant-input-suffix button {
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
-}
-
-.global-search-item-count {
-  position: absolute;
-  right: 16px;
 }

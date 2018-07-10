@@ -1,18 +1,19 @@
 import React, { Component } from 'react';
 import './App.css';
 
-import { Line } from 'react-chartjs-2';
-
 import 'antd/dist/antd.css';
+import './Components/Searchbox.css'
 
 import { Layout, Menu } from 'antd';
 import { Spin, Icon } from 'antd';
+import { DatePicker } from 'antd';
 
 // Custom
-import Searchbox from './Components/Searchbox.js'
+import Searchbox from './Components/Searchbox.js';
+import StockChart from './Components/StockChart.js';
 
 const { Header, Content, Sider } = Layout;
-
+const { RangePicker } = DatePicker;
 const MenuItemGroup = Menu.ItemGroup;
 
 class App extends Component {
@@ -20,7 +21,20 @@ class App extends Component {
     state = {
         data: [],
         stocks: [],
-        ticker: 'A'
+        ticker: 'A',
+        start: 0,
+        end: Date.now()
+    }
+
+    toUnixTimestamp = input => {
+        input = input.split(" - ").map(function (date){
+        return Date.parse(date+"-0500")/1000;
+        }).join(" - ");
+    }
+
+    onChange = (date, dateString) => {
+        if(!this.arrayExists(date))this.setState({start: 0, end: Date.now()});
+        else this.setState({start: date[0].unix(), end: date[1].unix()});
     }
 
     componentWillMount(){
@@ -34,22 +48,12 @@ class App extends Component {
         .catch(error => console.log(error));
     }
 
-    setSelection = (ticker) => {
+    setSelection = ticker => {
         this.setState({ticker: ticker});
         this.getData(ticker);
     }
 
     renderStock = stock => <Menu.Item key={this.state.stocks.indexOf(stock)+1}>{stock}</Menu.Item>;
-
-    timeConverter = UNIX_timestamp => {
-        var a = new Date(UNIX_timestamp * 1000);
-        var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-        var year = a.getFullYear();
-        var month = months[a.getMonth()];
-        var date = a.getDate();
-        var time = date + ' ' + month + ' ' + year;
-        return time;
-    }
 
     getData = stock => {
         fetch(`http://localhost:4000/data?ticker=${stock}&points=-1`)
@@ -58,15 +62,33 @@ class App extends Component {
         .catch(error => console.log(error));
     }
 
-    arrayExists(val){
+    arrayExists = val => {
         return (typeof val !== 'undefined' && val.length > 0);
+    }
+
+    getClosestIdx = (array, item) => {
+        var size = array.length;
+        if(item <= array[0])return 0;
+        if(item >= array[size-1])return size-1;
+        // This is bad. Really bad. I should replace this with a Binary Search at some point...
+        var idx = 0;
+        while(array[idx] < item)idx++;
+        return idx;
+    }
+
+    cropData = data => {
+        const {start, end} = this.state;
+        const dates = data.map(value => value.date);
+        var startIdx = this.getClosestIdx(dates, start);
+        var endIdx = this.getClosestIdx(dates, end);
+        return data.slice(startIdx, endIdx);
     }
 
     render() {
         const {data, stocks, ticker} = this.state;
-        console.log(ticker);
         if(this.arrayExists(stocks) && !this.arrayExists(data))this.getData(this.state.stocks[0]);
         if(this.arrayExists(stocks) && this.arrayExists(data)) {
+            const chartData = this.cropData(data);
             return (
                 <Layout style={{height: '100vh'}} className="layout">
                     <Header style={{textAlign: 'center'}}>
@@ -82,29 +104,16 @@ class App extends Component {
 
                                 <Searchbox stocks={stocks} onSearch={this.setSelection}/>
 
-                                <MenuItemGroup key="g1" className="scrollable">{stocks.map(this.renderStock)}</MenuItemGroup>
+                                <RangePicker className="searchbox" onChange={this.onChange} />
+
+                                <MenuItemGroup className="scrollable">{stocks.map(this.renderStock)}</MenuItemGroup>
                             </Menu>
                         </Sider>
                     <Layout>
-                        <Content style={{ background: '#fff', padding: 24, margin: 0, minHeight: 280 }}>
-                            <Line
-                                data={{
-                                    labels: data.map(value => value.date).map(value => this.timeConverter(value)),
-                                    datasets: [{
-                                        data: data.map(value => value.close),
-                                        label: ticker,
-                                        borderColor: "#3e95cd",
-                                        borderWidth: 1.5,
-                                        fill: false,
-                                        lineTension: 0
-                                    }
-                                ]
-                            }}
-                            options={{
-                                maintainAspectRatio: false,
-                                elements: { point: { radius: 0 } }
-                            }}
-                        />
+                        <Content className="mainContent">
+                            <StockChart
+                                data={chartData}
+                                ticker={ticker}/>
                         </Content>
                     </Layout>
                     </Layout>
