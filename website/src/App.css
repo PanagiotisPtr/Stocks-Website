@@ -2,6 +2,16 @@
   text-align: center;
 }
 
+.centerItem{
+    overflow: hidden;
+    position: absolute;
+    width: 90%;
+    height: 90%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 .App-logo {
   animation: App-logo-spin infinite 20s linear;
   height: 80px;
