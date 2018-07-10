@@ -30,7 +30,7 @@ function return_query_json(query, respond){
 }
 
 app.get('/stocks', (request, respond) => {
-    const q = `select table_name from information_schema.tables where table_schema='cpp_example';`;
+    const q = `select table_name from information_schema.tables where table_schema='database';`;
     return_query_json(q, respond);
 });
 
