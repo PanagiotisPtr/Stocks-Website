@@ -7,21 +7,24 @@ import './Components/Searchbox.css'
 import { Layout, Menu } from 'antd';
 import { Spin, Icon } from 'antd';
 import { DatePicker } from 'antd';
+import { Card } from 'antd';
 
-// Custom
+// Components
 import Searchbox from './Components/Searchbox.js';
 import StockChart from './Components/StockChart.js';
 
 const { Header, Content, Sider } = Layout;
 const { RangePicker } = DatePicker;
 const MenuItemGroup = Menu.ItemGroup;
+const { Meta } = Card;
 
 class App extends Component {
 
     state = {
         data: [],
         stocks: [],
-        ticker: 'A',
+        news: [],
+        ticker: 'AAPL',
         start: 0,
         end: Date.now()
     }
@@ -41,19 +44,43 @@ class App extends Component {
         this.getStocks();
     }
 
+    getTickers = (data) => {
+        return data.map(value => value.Tables_in_DATABASE).filter(value => !value.includes("_"));
+    }
+
     getStocks = () => {
         return fetch(`http://localhost:4000/stocks`)
         .then(response => response.json())
-        .then(response => this.setState({stocks: response.data.map(value => value.table_name)}))
+        .then(response => this.setState({stocks: this.getTickers(response.data)}))
+        .catch(error => console.log(error));
+    }
+
+    getNews = ticker => {
+        return fetch(`http://localhost:4000/news?ticker=${ticker}`)
+        .then(response => response.json())
+        .then(response => this.setState({news: response.data}))
         .catch(error => console.log(error));
     }
 
     setSelection = ticker => {
         this.setState({ticker: ticker});
         this.getData(ticker);
+        this.getNews(ticker);
     }
 
     renderStock = stock => <Menu.Item key={this.state.stocks.indexOf(stock)+1}>{stock}</Menu.Item>;
+
+    renderCard = ({urlToImage, title, description}) =>
+    <Card
+        hoverable
+        style={{ width: 240 }}
+        cover={<img alt="thumbnail" src={urlToImage} />}
+      >
+        <Meta
+          title={title}
+          description={description}
+        />
+    </Card>;
 
     getData = stock => {
         fetch(`http://localhost:4000/data?ticker=${stock}&points=-1`)
@@ -85,8 +112,11 @@ class App extends Component {
     }
 
     render() {
-        const {data, stocks, ticker} = this.state;
-        if(this.arrayExists(stocks) && !this.arrayExists(data))this.getData(this.state.stocks[0]);
+        const {data, stocks, news, ticker} = this.state;
+        if(this.arrayExists(stocks) && !this.arrayExists(data)){
+            this.getData(this.state.ticker);
+            this.getNews(this.state.ticker)
+        }
         if(this.arrayExists(stocks) && this.arrayExists(data)) {
             const chartData = this.cropData(data);
             return (
@@ -98,7 +128,7 @@ class App extends Component {
                         <Sider>
                             <Menu
                                 mode="inline"
-                                defaultSelectedKeys={['1']}
+                                defaultSelectedKeys={[(this.state.stocks.indexOf(ticker)+1).toString()]}
                                 onClick={({item, key, keyPath}) => this.setSelection(stocks[key-1]) }
                                 style={{ height: '100%', borderRight: 0}}>
 
@@ -115,6 +145,10 @@ class App extends Component {
                                 data={chartData}
                                 ticker={ticker}/>
                         </Content>
+                        <Sider className="scrollable" style={{ height: '100vh', background: 'white'}}>
+                            <h3>Powered by the NewsAPI</h3>
+                            {news.map(this.renderCard)}
+                        </Sider>
                     </Layout>
                     </Layout>
                 </Layout>

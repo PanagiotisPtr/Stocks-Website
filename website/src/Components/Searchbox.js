@@ -41,6 +41,7 @@ class Searchbox extends Component{
             >
                 <Input
                 spellCheck="false"
+                style={{textTransform: 'uppercase'}}
               />
           </AutoComplete>
         );
