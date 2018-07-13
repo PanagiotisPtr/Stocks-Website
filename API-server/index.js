@@ -6,9 +6,9 @@ const app = express();
 
 const connection = mysql.createConnection({
     host: 'localhost',
-    user: 'username',
+    user: 'user',
     password: 'password',
-    database: 'database'
+    database: 'databse'
 });
 
 connection.connect(error => {
@@ -29,8 +29,16 @@ function return_query_json(query, respond){
     });
 }
 
+app.get('/news', (request, respond) => {
+    const {ticker} = request.query;
+    if(!ticker)respond.send('Please give the ticker of the company as parameter.')
+    else{
+        return_query_json(`select * from ${ticker}_news`, respond);
+    }
+});
+
 app.get('/stocks', (request, respond) => {
-    const q = `select table_name from information_schema.tables where table_schema='database';`;
+    const q = `show tables;`;
     return_query_json(q, respond);
 });
 
