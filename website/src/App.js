@@ -73,7 +73,6 @@ class App extends Component {
     renderCard = ({urlToImage, title, description}) =>
     <Card
         hoverable
-        style={{ width: 240 }}
         cover={<img alt="thumbnail" src={urlToImage} />}
       >
         <Meta
